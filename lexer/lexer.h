@@ -1,55 +1,71 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include <string>
 #include <vector>
+#include <limits>
 
 #include "lexeme.h"
-
-/* 
- * lexer.h - tokenizes based on a config file of all valid tokens
- */
+#include "../input/input.h"
 
 /*
- * Idea:
- * - reads keywords from config file
- * - generates 2d array (table) from keywords in config file
- *   - look for similar words
- *     - states are negative, positive states is acceptancea and the lexeme_type
- *     - basically upon reading a word, walk the existing table
- *       - if I miss on the existing table, for every remaining char add a new
- *         state 
- *       - if it's the same string: complain and die
- *     - time complexity O(n)?
- * - it goes: table[current state][input token]
- * - unicode okay: treat unicode chars as multiple characters: you can still
- *   handle them in the same space as ascii albeit 3 more lookups at worst case.
- *   that's fine, that's still like O(1)
+ * Constants declaration
  */
+
+/* State to reject a token */
+const int _lexer_reject_state  = std::numeric_limits<int>::max();
+// TODO make each state an object instead of relying on jank moves like this?
+// But classes will be hard to store in plaintext, that's a bit of a problem.
+
+/* 
+ * Range of characters accepted, currently 2^8 for basic char support.
+ *
+ * The current idea is to use four 256 sized vals to represent UTF chars.
+ */
+const int LEXER_CHAR_RANGE = 256;
+
+/* All characters considered whitespace */
+const char LEXER_WHITESPACE_CHARS[] = {
+	' ', '\t',
+};
 
 class lexer {
 private:
-	int** lookup_table;
+	/* Buffer for peeking */
+	std::vector<lexeme> buffer;
+	input* input_src = nullptr;
+
+	/* lookup_table[<current state>][<input char>] */
+	int** lookup_table = nullptr;
+
 
 public:
 	/**
-	 * Constructs a lexer and builds the lookup table
-	 *
-	 * @param config_file The name of the configuration file to read keywords from
+	 * Fetch a single lexeme from the input source
 	 */
-	lexer(std::string config_file);
+	lexeme get_next_lexeme();
+	/* 
+	 * Construct a new lexer and initialize the lookup table used to lex
+	 *
+	 * @param src The input source to use for the lexer
+	 */
+	lexer(input *src);
+	~lexer();
 
 	/**
-	 * Rebuilds the lexing table 
-	 *
-	 * @param config_file The name of the configuration file to read keywords from
+	 * Return the next token without consuming it
 	 */
-	void rebuild(std::string config_file);
+	lexeme peek();
 
 	/**
-	 * Lexes based on the current lexing table
+	 * Return the next token and CONSUME the input
 	 */
-	std::vector<lexeme> lex();
+	lexeme get_next();
 };
+
+/* Checks if a char is a valid intermediate id character */
+bool is_valid_id_char(char c);
+
+/* Checks if a char is a valid starting id character */
+bool is_valid_starting_id_char(char c);
 
 #endif
