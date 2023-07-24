@@ -1,9 +1,10 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-class parser {
+#include "../ast.h"
+
+class parser : ast_traversal {
 public:
-	virtual parser()
 };
 
 #endif
