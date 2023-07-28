@@ -7,7 +7,8 @@
 void ast::print()
 {
 	ast_print tmp = ast_print();
-	this->accept(&tmp);
+	tmp.traverse(this);
+	// this->accept(&tmp);
 }
 
 /*
@@ -15,7 +16,7 @@ void ast::print()
  */
 
 template<class CRTP>
-int ast_tmpl<CRTP>::accept(ast_traversal *t)
+void* ast_tmpl<CRTP>::accept(ast_traversal *t)
 {
 	return t->visit(static_cast<CRTP*>(this));
 }
@@ -57,14 +58,14 @@ ast_define::ast_define(std::string id, ast *eval) { this->id = id; this->eval = 
  */
 ast_print::ast_print(int initial_indent_lvl) { this->indent_lvl = initial_indent_lvl; }
 
-int ast_print::visit(ast_id *n)
+void* ast_print::visit(ast_id *n)
 {
 	for (int i = 0; i < indent_lvl; i++) std::cout << "   ";
 	std::cout << "AST Identifier: " << n->id << std::endl;
 	return 0; 
 }
 
-int ast_print::visit(ast_lit *n)
+void* ast_print::visit(ast_lit *n)
 {
 	for (int i = 0; i < indent_lvl; i++) std::cout << "   ";
 	std::cout << "AST Literal Value: " << n->val << std::endl;
@@ -72,17 +73,16 @@ int ast_print::visit(ast_lit *n)
 } 
 
 template<class ast_type>
-int ast_print::_ast_print_visit_binop_children(ast_type *n)
+void ast_print::_ast_print_visit_binop_children(ast_type *n)
 {
 	indent_lvl ++;
 	n->lhs->accept(this);
 	n->rhs->accept(this);
 	indent_lvl --;
-	return 0; // TODO figure out return types
 }
 
 // TODO this could be smarter: Figure out how
-int ast_print::visit(ast_add *n)
+void* ast_print::visit(ast_add *n)
 {
 	for (int i = 0; i < indent_lvl; i++) std::cout << "   ";
 	std::cout << "AST Addition (+)" << std::endl;
@@ -90,7 +90,7 @@ int ast_print::visit(ast_add *n)
 	return 0; 
 } 
 
-int ast_print::visit(ast_sub *n)
+void* ast_print::visit(ast_sub *n)
 {
 	for (int i = 0; i < indent_lvl; i++) std::cout << "   ";
 	std::cout << "AST Subtraction (-)" << std::endl;
@@ -98,7 +98,7 @@ int ast_print::visit(ast_sub *n)
 	return 0; 
 } 
 
-int ast_print::visit(ast_mul *n)
+void* ast_print::visit(ast_mul *n)
 {
 	for (int i = 0; i < indent_lvl; i++) std::cout << "   ";
 	std::cout << "AST Multiplication (*)" << std::endl;
@@ -106,7 +106,7 @@ int ast_print::visit(ast_mul *n)
 	return 0; 
 } 
 
-int ast_print::visit(ast_div *n)
+void* ast_print::visit(ast_div *n)
 {
 	for (int i = 0; i < indent_lvl; i++) std::cout << "   ";
 	std::cout << "AST Division (/)" << std::endl;
@@ -114,7 +114,7 @@ int ast_print::visit(ast_div *n)
 	return 0; 
 } 
 
-int ast_print::visit(ast_exp *n)
+void* ast_print::visit(ast_exp *n)
 {
 	for (int i = 0; i < indent_lvl; i++) std::cout << "   ";
 	std::cout << "AST Exponentiation (^)" << std::endl;
@@ -122,7 +122,7 @@ int ast_print::visit(ast_exp *n)
 	return 0; 
 } 
 
-int ast_print::visit(ast_assign *n)
+void* ast_print::visit(ast_assign *n)
 {
 	for (int i = 0; i < indent_lvl; i++) std::cout << "   ";
 	std::cout << "AST Assignment (=): " << n->id << std::endl;
@@ -132,7 +132,7 @@ int ast_print::visit(ast_assign *n)
 	return 0; 
 } 
 
-int ast_print::visit(ast_define *n)
+void* ast_print::visit(ast_define *n)
 {
 	for (int i = 0; i < indent_lvl; i++) std::cout << "   ";
 	std::cout << "AST Define (=): " << n->id << std::endl;
@@ -141,3 +141,9 @@ int ast_print::visit(ast_define *n)
 	indent_lvl --;
 	return 0; 
 } 
+
+template<class CRTP, typename result_t>
+result_t ast_traversal_tmpl<CRTP, result_t>::traverse(ast *n)
+{
+	return static_cast<result_t>(n->accept(static_cast<CRTP*>(this)));
+}

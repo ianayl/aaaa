@@ -8,7 +8,7 @@
 #include "../input/input.h"
 
 /*
- * Constants declaration
+ * Constants dpceclaration
  */
 
 /* State to reject a token */

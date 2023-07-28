@@ -19,26 +19,54 @@
 // };
 
 /**
- * A visitor pattern representing one tree-walk traversal of the AST -- useful
- * for e.g. AST optimization, type checking, or straight tree-walk interpretation
+ * the BASE class for a visitor pattern representing one tree-walk traversal of
+ * the AST -- useful for e.g. AST optimization, type checking, or straight tree-
+ * walk interpretation.
+ *
+ * Note: use ast_traversal_tmpl when creating AST traversals! Return types are
+ * enforced independently in the traverse() function and each individual impl
+ * of visit.
  */
 class ast_traversal {
 public:
-	virtual int visit(class ast_id     *n)  = 0;
-	virtual int visit(class ast_lit    *n) = 0;
-	virtual int visit(class ast_add    *n) = 0;
-	virtual int visit(class ast_sub    *n) = 0;
-	virtual int visit(class ast_mul    *n) = 0;
-	virtual int visit(class ast_div    *n) = 0;
-	virtual int visit(class ast_exp    *n) = 0;
-	virtual int visit(class ast_assign *n) = 0;
-	virtual int visit(class ast_define *n) = 0;
+	virtual void* visit(class ast_id     *n) = 0;
+	virtual void* visit(class ast_lit    *n) = 0;
+	virtual void* visit(class ast_add    *n) = 0;
+	virtual void* visit(class ast_sub    *n) = 0;
+	virtual void* visit(class ast_mul    *n) = 0;
+	virtual void* visit(class ast_div    *n) = 0;
+	virtual void* visit(class ast_exp    *n) = 0;
+	virtual void* visit(class ast_assign *n) = 0;
+	virtual void* visit(class ast_define *n) = 0;
+};
+
+/*
+ * Note on the visitor functions:
+ * - accept() is usually a CRTP that works as normal
+ * - visit() is the visitor function, except usually the return type is void*
+ *   as to not assume return types of any of the visitors. However, internally,
+ *   in each implementation of visit(), it is expected that type conversions are
+ *   enfored INTERNALLY.
+ * - traverse() is the ACTUAL function used to traverse an AST. This is because
+ *   traverse will actually enforce the return result of the output. This saves
+ *   you the effort from having to cast every time.
+ */
+
+template<class CRTP, typename result_t>
+class ast_traversal_tmpl : public ast_traversal {
+public:
+	/**
+	 * Traverse an AST using the current AST traversal 
+	 * Note: This is a template function and the return type of the function is
+	 * determined by template arguments
+	 */
+	result_t traverse(class ast *n);
 };
 
 /**
  * AST Traversal for printing an AST to stdout
  */
-class ast_print : public ast_traversal {
+class ast_print : public ast_traversal_tmpl<ast_print, void> {
 private:
 	int indent_lvl;
 
@@ -46,7 +74,7 @@ private:
 	 * Helper function for visiting the children of a binop AST node
 	 */
 	template<class ast_type>
-	int _ast_print_visit_binop_children(ast_type *n);
+	void _ast_print_visit_binop_children(ast_type *n);
 public:
 	/**
 	 * Create an AST traversal to print an AST to stdout
@@ -54,15 +82,15 @@ public:
 	 */
 	ast_print(int initial_indent_lvl = 0);
 
-	int visit(ast_id     *n);
-	int visit(ast_lit    *n);
-	int visit(ast_add    *n);
-	int visit(ast_sub    *n);   
-	int visit(ast_mul    *n);   
-	int visit(ast_div    *n);   
-	int visit(ast_exp    *n);   
-	int visit(ast_assign *n);
-	int visit(ast_define *n);
+	void* visit(ast_id     *n);
+	void* visit(ast_lit    *n);
+	void* visit(ast_add    *n);
+	void* visit(ast_sub    *n);   
+	void* visit(ast_mul    *n);   
+	void* visit(ast_div    *n);   
+	void* visit(ast_exp    *n);   
+	void* visit(ast_assign *n);
+	void* visit(ast_define *n);
 };
 
 
@@ -76,7 +104,7 @@ public:
 	 * Travel the current AST node using the provided traversal
 	 * @param t Traversal object used to travel current node
 	 */
-	virtual int accept(class ast_traversal *t) = 0;
+	virtual void* accept(class ast_traversal *t) = 0;
 	void print();
 };
 
@@ -91,7 +119,7 @@ public:
 template<class CRTP>
 class ast_tmpl : public ast {
 public:
-	int accept(ast_traversal *t);
+	void* accept(ast_traversal *t);
 };
 
 /* AST node representing identifiers */
@@ -111,7 +139,7 @@ public:
 /**
  * Helper template for representing binary operation AST nodes
  */
-template<typename CRTP>   /* Curiously repeating template pattern */
+template<class CRTP>   /* Curiously repeating template pattern */
 class ast_binop_tmpl : public ast_tmpl<CRTP> {
 public:
 	ast *lhs, *rhs;

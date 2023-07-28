@@ -8,6 +8,7 @@ int main()
 	ast_add n3 = ast_add(&n4, &n5);
 	ast_mul n2 = ast_mul(&n6, &n3);
 	ast_assign n1 = ast_assign("bartholomew", &n2);
+	ast *n = &n1; 
 
-	n1.print();
+	n->print();
 }
