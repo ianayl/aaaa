@@ -1,4 +1,4 @@
-#include "lexer.h"
+#include "../lexer.h"
 #include <array>
 #include <algorithm>
 #include <iostream>
@@ -102,9 +102,9 @@ lexer::lexer(input *src)
 		bool is_valid_id = true;  /* Is the lexeme, up to the current character, a valid identifier? */
 
 		std::string::const_iterator lexeme_it = lexeme_defs[t].begin();
-		is_valid_id = is_valid_starting_id_char(*lexeme_it);  /* Check if this lexeme can even be an identifier */
+		is_valid_id = _lexer_is_valid_starting_id_ch(*lexeme_it);  /* Check if this lexeme can even be an identifier */
 		while (lexeme_it != lexeme_defs[t].end()) {
-			if (is_valid_id) is_valid_id = is_valid_id_char(*lexeme_it);
+			if (is_valid_id) is_valid_id = _lexer_is_valid_id_ch(*lexeme_it);
 
 			std::array<int, LEXER_CHAR_RANGE> next_state;
 			/* 
@@ -180,7 +180,7 @@ lexer::~lexer()
 	if (this->input_src != nullptr) delete input_src;
 }
 
-bool is_valid_id_char(char c)
+bool _lexer_is_valid_id_ch(char c)
 {
 	if ((c >= 'A' && c <= 'Z') ||
 		(c >= 'a' && c <= 'z') ||
@@ -190,7 +190,7 @@ bool is_valid_id_char(char c)
 	else return false;
 }
 
-bool is_valid_starting_id_char(char c)
+bool _lexer_is_valid_starting_id_ch(char c)
 {
 	if ((c >= 'A' && c <= 'Z') ||
 		(c >= 'a' && c <= 'z') ||
@@ -211,4 +211,21 @@ lexeme lexer::get_next_lexeme()
 		if (state <= 0) input_src->get_next();   /* Consume the next char if next state is a transition */
 	}
 	return lexeme((lexeme_t) state, buffer);
+}
+
+lexeme lexer::peek(int lookahead)
+{
+	while (buffer.size() < lookahead + 1)
+		buffer.push_back(this->get_next_lexeme());
+	return buffer[lookahead];
+}
+
+// TODO finish this by popping lookahead number of tokens
+lexeme lexer::consume(int lookahead)
+{
+	// while (buffer.size() < lookahead + 1)
+	// 	buffer.push_back(this->get_next_lexeme());
+	lexeme tmp = buffer[0];
+	buffer.erase(buffer.begin());
+	return tmp;
 }

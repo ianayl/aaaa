@@ -52,20 +52,22 @@ public:
 	~lexer();
 
 	/**
-	 * Return the next token without consuming it
+	 * Return the next lookahead-th token without consuming it
 	 */
-	lexeme peek();
+	lexeme peek(int lookahead = 0);
 
 	/**
-	 * Return the next token and CONSUME the input
+	 * Return the next token and consume the token
 	 */
-	lexeme get_next();
+	lexeme consume(int lookahead = 0);
 };
 
+// TODO should these be put as private functions? where do util functions go?
+
 /* Checks if a char is a valid intermediate id character */
-bool is_valid_id_char(char c);
+bool _lexer_is_valid_id_ch(char c);
 
 /* Checks if a char is a valid starting id character */
-bool is_valid_starting_id_char(char c);
+bool _lexer_is_valid_starting_id_ch(char c);
 
 #endif

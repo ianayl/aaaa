@@ -22,7 +22,6 @@ char test_input::peek()
 
 test_input::~test_input()
 {
-	std::cout << "poop" << std::endl;
 }
 
 std::string test_input::print_remainder()

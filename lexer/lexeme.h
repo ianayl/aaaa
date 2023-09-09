@@ -12,13 +12,13 @@ enum lexeme_t
 	/* Symbols */
 	lexeme_lparen,          /* ( */
 	lexeme_rparen,          /* ) */
-// 	lexeme_plus,            /* + */
+ 	lexeme_plus,            /* + */
  	lexeme_dash,            /* - */
-// 	lexeme_asterisk,        /* * */
-// 	lexeme_fslash,          /* / */
-// 	lexeme_lbrace,          /* { */
-// 	lexeme_rbrace,          /* } */
-// 	lexeme_assign,          /* = */
+ 	lexeme_asterisk,        /* * */
+ 	lexeme_fslash,          /* / */
+ 	lexeme_lbrace,          /* { */
+ 	lexeme_rbrace,          /* } */
+ 	lexeme_equals,          /* = */
  	lexeme_arrow,           /* -> */
 	/* Keywords */
 	lexeme_define,          /* def */
@@ -34,13 +34,13 @@ const std::string lexeme_defs[] = {
 	"LEXEME_NULL",          /* lol */
 	"(",
 	")",
-	// "+",
+	"+",
 	"-",
-	// "*",
-	// "/",
-	// "{",
-	// "}",
-	// "=",
+	"*",
+	"/",
+	"{",
+	"}",
+	"=",
 	"->",
 	"def",
 	"fn",
