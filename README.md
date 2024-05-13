@@ -1,3 +1,1 @@
-# AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-
-ITS SO OVER
+Scrap work for a new rendition of experimental interpreter
